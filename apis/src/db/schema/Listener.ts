@@ -10,4 +10,5 @@ export const transferV400 = table("transfer_v4_0_0", {
   valueInEth: db.uint256('value_in_eth'),
   txHash: db.bytes32('tx_hash'),
   tokenContext: t.text('token_context'),
+  blockNumber: db.uint256('block_number'),
 })

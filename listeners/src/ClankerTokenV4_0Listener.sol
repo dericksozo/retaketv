@@ -26,6 +26,7 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
         uint256 valueInEth;
         bytes32 txHash;
         string tokenContext;
+        uint256 blockNumber;
     }
 
     // from https://github.com/Uniswap/v4-core/src/types/PoolKey.sol
@@ -62,7 +63,8 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
             value: inputs.value,
             valueInEth: 0,
             txHash: ctx.txn.hash(),
-            tokenContext: tokenContext
+            tokenContext: tokenContext,
+            blockNumber: block.number
         });
 
         emit TransferV4_0_0(data);
