@@ -1,18 +1,30 @@
 # Sim IDX Sample Project
 
-**Sim IDX** is a framework that helps you build and deploy applications that index blockchain data in minutes. Define listeners that react to specific onchain events, extract relevant data, and automatically make this data queryable via an API.
+This project indexes clankerToken transfers for retaketv tokens. They can be identified with a specific context. 
 
-This sample project indexes **Uniswap V3 Factory pool creation events** and serves as your starting point for building with Sim IDX.
+The indexing uses multiple criteria:
 
-When you're ready to continue, the [Quickstart guide](https://docs.sim.dune.com/idx) will walk you through authenticating and testing your listener on real data.
+1. Filter for all tokens that conform to the clankerToken ABI (= all clanker tokens)
+2. Filter for tokens that have the string `streamm deployment` as value for `messageId` in the token context (= all retaketv tokens)
+3. Filter for token transfers with a value > 0.01 ETH
 
-## What You'll Edit
+The tokens are on BASE. Suitable test blocks are:
 
-The main files and folders you'll work with are:
+|   Block   | Tx Hash                                                                   |
+|-----------|---------------------------------------------------------------------------|
+| 35664472  | `0xcc1270c6fcee5a167f23da82898f71eacc76bcf16b5c3bd6f6052f075f759958`      |
+| 35667121  | `0x4f03dac42d4bf709085ddc0fc8e5c674d6a0b75c9231895379115f6fdf4e0fdc`      |
+| 35667724  | `0xec6240a1ac32ad41b6bb33b69ca6ae6afb1e535259ceaecb7b40351eb3a8bc2a`      |
 
--   **`abis/`** - Add JSON ABI files for contracts you want to index.
--   **`listeners/src/`** - Define your `Triggers` contract in `Main.sol` and implement your handler logic in one or more listener contracts.
--   **`apis/src/index.ts`** - Define APIs for your indexed data.
+## Various Addresses
+
+| Human Readable Name         | Address                                      |
+|-----------------------------|----------------------------------------------|
+| Clanker V4.0.0              | `0xE85A59c628F7d27878ACeB4bf3b35733630083a9` |
+| Uniswap V4 PoolManager      | `0x498581fF718922c3f8e6A244956aF099B2652b2b` |
+| WETH (Base)                 | `0x4200000000000000000000000000000000000006` |
+| Uniswap V4 Quoter (Base)    | `0x0d5e0F971ED27FBfF6c2837bf31316121532048D` |
+
 
 ## App Structure
 

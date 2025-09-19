@@ -12,12 +12,10 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
     /// Emitted events are indexed.
     /// To change the data which is indexed, modify the event or add more events.
 
-    address constant CLANKER_V4_0_0_BASE =
-        0xE85A59c628F7d27878ACeB4bf3b35733630083a9;
-    address constant UNISWAP_V4_POOLMANAGER_BASE =
-        0x498581fF718922c3f8e6A244956aF099B2652b2b;
+    address constant CLANKER_V4_0_0_BASE = 0xE85A59c628F7d27878ACeB4bf3b35733630083a9;
+    address constant UNISWAP_V4_POOLMANAGER_BASE = 0x498581fF718922c3f8e6A244956aF099B2652b2b;
     address constant WETH_BASE = 0x4200000000000000000000000000000000000006;
-    address constant UNISWAP_V4_QUOTER_BASE = 0x671279e75670654075d89731d790345E80277545;
+    address constant UNISWAP_V4_QUOTER_BASE = 0x0d5e0F971ED27FBfF6c2837bf31316121532048D;
 
     struct TransferData {
         address from;
@@ -55,13 +53,13 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
             revert("Not a StreamDeployment");
         }
 
-        // uint256 valueInEth = getValue(ctx.txn.call.callee(), inputs.value);
+        uint256 valueInEth = getValue(ctx.txn.call.callee(), inputs.value);
 
         TransferData memory data = TransferData({
             from: inputs.from,
             to: inputs.to,
             value: inputs.value,
-            valueInEth: 0,
+            valueInEth: valueInEth,
             txHash: ctx.txn.hash(),
             tokenContext: tokenContext,
             blockNumber: block.number
