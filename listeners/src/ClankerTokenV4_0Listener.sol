@@ -59,7 +59,7 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
             from: inputs.from,
             to: inputs.to,
             value: inputs.value,
-            valueInEth: valueInEth,
+            valueInEth: 0,
             txHash: ctx.txn.hash(),
             tokenContext: tokenContext,
             blockNumber: block.number
