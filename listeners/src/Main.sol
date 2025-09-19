@@ -15,8 +15,8 @@ contract Triggers is BaseTriggers {
     address constant CLANKER_V3_1_0_BASE = 0x2A787b2362021cC3eEa3C24C4748a6cD5B687382;
     address constant CLANKER_V4_0_0_BASE = 0xE85A59c628F7d27878ACeB4bf3b35733630083a9;
 
-    uint256 constant START_BLOCK = 35660000;
-    uint256 constant END_BLOCK = START_BLOCK + 5000;
+    uint64 constant START_BLOCK = 35660000;
+    uint64 constant END_BLOCK = START_BLOCK + 5000;
 
     function triggers() external virtual override {
 
