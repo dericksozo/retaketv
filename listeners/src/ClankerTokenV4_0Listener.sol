@@ -49,9 +49,9 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
         string memory tokenContext = IClankerTokenV4_0(ctx.txn.call.callee())
             .context();
 
-        if (!containsStreammDeployment(tokenContext)) {
-            revert("Not a StreamDeployment");
-        }
+        // if (!containsStreammDeployment(tokenContext)) {
+        //     revert("Not a StreamDeployment");
+        // }
 
         // uint256 valueInEth = getValue(ctx.txn.call.callee(), inputs.value);
 
