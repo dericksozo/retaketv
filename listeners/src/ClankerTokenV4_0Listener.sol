@@ -53,7 +53,7 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
             revert("Not a StreamDeployment");
         }
 
-        uint256 valueInEth = getValue(ctx.txn.call.callee(), inputs.value);
+        // uint256 valueInEth = getValue(ctx.txn.call.callee(), inputs.value);
 
         TransferData memory data = TransferData({
             from: inputs.from,
