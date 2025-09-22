@@ -45,19 +45,19 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
 
     event TransferV4_0_0(TransferData);
 
-    event TokenDeployment(
-        address token,
-        bytes32 txHash,
-        IClanker.DeploymentInfo deploymentInfo
-    );
-    event PoolKeyEmitted(IV4Quoter.PoolKey poolKey, bytes32 poolId);
-    event QuoteExactSingleParamsEmitted(
-        IV4Quoter.QuoteExactSingleParams quoteExactSingleParams
-    );
-    event AmountOutEmitted(uint256 amountOut);
-    event SortedAddresses(address c0, address c1, bool aIsFirst);
-    event QuoterError(string reason);
-    event QuoterLowLevelError(bytes data);
+    // event TokenDeployment(
+    //     address token,
+    //     bytes32 txHash,
+    //     IClanker.DeploymentInfo deploymentInfo
+    // );
+    // event PoolKeyEmitted(IV4Quoter.PoolKey poolKey, bytes32 poolId);
+    // event QuoteExactSingleParamsEmitted(
+    //     IV4Quoter.QuoteExactSingleParams quoteExactSingleParams
+    // );
+    // event AmountOutEmitted(uint256 amountOut);
+    // event SortedAddresses(address c0, address c1, bool aIsFirst);
+    // event QuoterError(string reason);
+    // event QuoterLowLevelError(bytes data);
 
     /// @notice Error thrown when the token is not a retaketv token
     /// @dev Its selector is 0xa3729561.
@@ -118,10 +118,10 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
         IClanker.DeploymentInfo memory deploymentInfo = clanker
             .tokenDeploymentInfo(token);
 
-        emit TokenDeployment(token, txHash, deploymentInfo);
+        // emit TokenDeployment(token, txHash, deploymentInfo);
 
         (address c0, address c1, bool aIsFirst) = addressSort(token, WETH_BASE);
-        emit SortedAddresses(c0, c1, aIsFirst);
+        // emit SortedAddresses(c0, c1, aIsFirst);
 
         // generate poolId
         IV4Quoter.PoolKey memory poolKey = IV4Quoter.PoolKey({
@@ -135,7 +135,7 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
         bytes32 poolId = keccak256(abi.encode(poolKey));
         // bytes32 poolKeyHash = keccak256(abi.encode(poolKey));
 
-        emit PoolKeyEmitted(poolKey, poolId);
+        // emit PoolKeyEmitted(poolKey, poolId);
 
         // Check for overflow when converting uint256 to uint128
         require(amount <= type(uint128).max, "Amount too large for uint128");
@@ -148,23 +148,23 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
                 hookData: '0x00'
             });
 
-        emit QuoteExactSingleParamsEmitted(quoteExactSingleParams);
+        // emit QuoteExactSingleParamsEmitted(quoteExactSingleParams);
 
 
         IV4Quoter quoter = IV4Quoter(UNISWAP_V4_QUOTER_BASE);
         
         try quoter.quoteExactInputSingle(quoteExactSingleParams) returns (uint256 amountOut, uint256 gasEstimate) {
-            emit AmountOutEmitted(amountOut);
+            // emit AmountOutEmitted(amountOut);
             return amountOut;
         } catch Error(string memory reason) {
             // Handle string errors (e.g., "Pool not found", "Insufficient liquidity")
-            emit QuoterError(reason);
-            emit AmountOutEmitted(0);
+            // emit QuoterError(reason);
+            // emit AmountOutEmitted(0);
             return 0;
         } catch (bytes memory lowLevelData) {
             // Handle low-level errors (e.g., function not found, revert without reason)
-            emit QuoterLowLevelError(lowLevelData);
-            emit AmountOutEmitted(0);
+            // emit QuoterLowLevelError(lowLevelData);
+            // emit AmountOutEmitted(0);
             return 0;
         }
     }
