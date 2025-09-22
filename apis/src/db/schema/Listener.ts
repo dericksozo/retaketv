@@ -6,6 +6,7 @@ import { db, types } from "@duneanalytics/sim-idx";
 export const transferV400 = table("transfer_v4_0_0", {
   from: db.address('from'),
   to: db.address('to'),
+  token: db.address('token'),
   value: db.uint256('value'),
   valueInEth: db.uint256('value_in_eth'),
   txHash: db.bytes32('tx_hash'),

@@ -24,6 +24,7 @@ The tokens are on BASE. Suitable test blocks are:
 | Uniswap V4 PoolManager      | `0x498581fF718922c3f8e6A244956aF099B2652b2b` |
 | WETH (Base)                 | `0x4200000000000000000000000000000000000006` |
 | Uniswap V4 Quoter (Base)    | `0x0d5e0F971ED27FBfF6c2837bf31316121532048D` |
+| Clanker Token from retaketv | `0x07FDD1704dfC9C0BaD59B1f050c9b36f6a239b07` |
 
 
 ## App Structure

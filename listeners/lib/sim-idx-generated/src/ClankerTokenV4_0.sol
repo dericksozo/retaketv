@@ -371,20 +371,6 @@ abstract contract ClankerTokenV4_0$OnDelegateVotesChangedEvent {
     }
 }
 
-abstract contract ClankerTokenV4_0$OnEip712DomainChangedEvent {
-    function onEip712DomainChangedEvent(EventContext memory ctx) virtual external;
-
-    function triggerOnEip712DomainChangedEvent() view external returns (Trigger memory) {
-        return Trigger({
-            abiName: "ClankerTokenV4_0",
-            selector: bytes32(0x0a6387c9ea3628b88a633bb4f3b151770f70085117a15f9bf3787cda53f13d31),
-            triggerType: TriggerType.EVENT,
-            listenerCodehash: address(this).codehash,
-            handlerSelector: this.onEip712DomainChangedEvent.selector
-        });
-    }
-}
-
 abstract contract ClankerTokenV4_0$OnTransferEvent {
     function onTransferEvent(EventContext memory ctx, ClankerTokenV4_0$TransferEventParams memory inputs) virtual external;
 
@@ -1608,7 +1594,6 @@ ClankerTokenV4_0$OnCrosschainBurnEvent,
 ClankerTokenV4_0$OnCrosschainMintEvent,
 ClankerTokenV4_0$OnDelegateChangedEvent,
 ClankerTokenV4_0$OnDelegateVotesChangedEvent,
-ClankerTokenV4_0$OnEip712DomainChangedEvent,
 ClankerTokenV4_0$OnTransferEvent,
 ClankerTokenV4_0$OnUpdateAdminEvent,
 ClankerTokenV4_0$OnUpdateImageEvent,
@@ -1620,7 +1605,6 @@ ClankerTokenV4_0$OnVerifiedEvent
   event CrosschainMint(ClankerTokenV4_0$EmitAllEvents$CrosschainMint);
   event DelegateChanged(ClankerTokenV4_0$EmitAllEvents$DelegateChanged);
   event DelegateVotesChanged(ClankerTokenV4_0$EmitAllEvents$DelegateVotesChanged);
-  event Eip712DomainChanged();
   event Transfer(ClankerTokenV4_0$EmitAllEvents$Transfer);
   event UpdateAdmin(ClankerTokenV4_0$EmitAllEvents$UpdateAdmin);
   event UpdateImage(ClankerTokenV4_0$EmitAllEvents$UpdateImage);
@@ -1642,9 +1626,6 @@ function onDelegateChangedEvent(EventContext memory ctx, ClankerTokenV4_0$Delega
 function onDelegateVotesChangedEvent(EventContext memory ctx, ClankerTokenV4_0$DelegateVotesChangedEventParams memory inputs) virtual external override {
     emit DelegateVotesChanged(ClankerTokenV4_0$EmitAllEvents$DelegateVotesChanged(inputs.delegate, inputs.previousVotes, inputs.newVotes));
   }
-function onEip712DomainChangedEvent(EventContext memory ctx) virtual external override {
-    emit Eip712DomainChanged();
-  }
 function onTransferEvent(EventContext memory ctx, ClankerTokenV4_0$TransferEventParams memory inputs) virtual external override {
     emit Transfer(ClankerTokenV4_0$EmitAllEvents$Transfer(inputs.from, inputs.to, inputs.value));
   }
@@ -1662,18 +1643,17 @@ function onVerifiedEvent(EventContext memory ctx, ClankerTokenV4_0$VerifiedEvent
   }
 
   function allTriggers() view external returns (Trigger[] memory) {
-    Trigger[] memory triggers = new Trigger[](11);
+    Trigger[] memory triggers = new Trigger[](10);
     triggers[0] = this.triggerOnApprovalEvent();
     triggers[1] = this.triggerOnCrosschainBurnEvent();
     triggers[2] = this.triggerOnCrosschainMintEvent();
     triggers[3] = this.triggerOnDelegateChangedEvent();
     triggers[4] = this.triggerOnDelegateVotesChangedEvent();
-    triggers[5] = this.triggerOnEip712DomainChangedEvent();
-    triggers[6] = this.triggerOnTransferEvent();
-    triggers[7] = this.triggerOnUpdateAdminEvent();
-    triggers[8] = this.triggerOnUpdateImageEvent();
-    triggers[9] = this.triggerOnUpdateMetadataEvent();
-    triggers[10] = this.triggerOnVerifiedEvent();
+    triggers[5] = this.triggerOnTransferEvent();
+    triggers[6] = this.triggerOnUpdateAdminEvent();
+    triggers[7] = this.triggerOnUpdateImageEvent();
+    triggers[8] = this.triggerOnUpdateMetadataEvent();
+    triggers[9] = this.triggerOnVerifiedEvent();
     return triggers;
   }
 }
