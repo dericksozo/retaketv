@@ -19,6 +19,5 @@ interface IV4Quoter {
 
     function quoteExactInputSingle(QuoteExactSingleParams memory params)
         external
-        view
         returns (uint256 amountOut, uint256 gasEstimate);
 }

@@ -10,11 +10,12 @@ The indexing uses multiple criteria:
 
 The tokens are on BASE. Suitable test blocks are:
 
-|   Block   | Tx Hash                                                                   |
-|-----------|---------------------------------------------------------------------------|
-| 35664472  | `0xcc1270c6fcee5a167f23da82898f71eacc76bcf16b5c3bd6f6052f075f759958`      |
-| 35667121  | `0x4f03dac42d4bf709085ddc0fc8e5c674d6a0b75c9231895379115f6fdf4e0fdc`      |
-| 35667724  | `0xec6240a1ac32ad41b6bb33b69ca6ae6afb1e535259ceaecb7b40351eb3a8bc2a`      |
+|   Block   | Tx Hash                                                                   | Comment                           |
+|-----------|---------------------------------------------------------------------------|-----------------------------------|
+| 35664472  | `0xcc1270c6fcee5a167f23da82898f71eacc76bcf16b5c3bd6f6052f075f759958`      |                                   |
+| 35667121  | `0x4f03dac42d4bf709085ddc0fc8e5c674d6a0b75c9231895379115f6fdf4e0fdc`      |                                   |
+| 35667724  | `0xec6240a1ac32ad41b6bb33b69ca6ae6afb1e535259ceaecb7b40351eb3a8bc2a`      |                                   |
+| 35660292  | `0x62a805b15b9e3dab20975a5f40fb18e9a31fef3b3db41144f549b240b2a8003d`      | single retaketv transfer in block |
 
 ## Various Addresses
 
