@@ -4,4 +4,9 @@ out = "out"
 libs = ["lib"]
 fs_permissions = [{ access = "read-write", path = "./" }]
 
+[lint]
+# exclude notice to use inline assembly instead of keccak256 to improve readability
+exclude_lints = ["asm-keccak256"]
+
+
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
