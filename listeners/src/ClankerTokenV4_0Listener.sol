@@ -25,7 +25,7 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
     uint24 public constant DYNAMIC_FEE_FLAG = 0x800000;
 
     struct TransferData {
-        address from;
+        address fromAddress;
         address to;
         address token;
         uint256 value;
@@ -90,7 +90,7 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
         require(ethValueInWei >= MINIMUM_ETH_VALUE, AmountTooLow(ethValueInWei, MINIMUM_ETH_VALUE));
 
         TransferData memory data = TransferData({
-            from: inputs.from,
+            fromAddress: inputs.from,
             to: inputs.to,
             token: ctx.txn.call.callee(),
             value: inputs.value,
