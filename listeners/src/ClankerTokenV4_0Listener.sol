@@ -33,6 +33,7 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
         bytes32 txHash;
         string tokenContext;
         uint256 blockNumber;
+        uint256 blockTimestamp;
         bool sell;
     }  
 
@@ -97,6 +98,7 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
             txHash: ctx.txn.hash(),
             tokenContext: tokenContext,
             blockNumber: block.number,
+            blockTimestamp: block.timestamp,
             sell: ctx.txn.call.caller() == inputs.from
         });
 
