@@ -26,7 +26,7 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
 
     struct TransferData {
         address fromAddress;
-        address to;
+        address toAddress;
         address token;
         uint256 value;
         uint256 ethValueInWei;
@@ -91,7 +91,7 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
 
         TransferData memory data = TransferData({
             fromAddress: inputs.from,
-            to: inputs.to,
+            toAddress: inputs.to,
             token: ctx.txn.call.callee(),
             value: inputs.value,
             ethValueInWei: ethValueInWei,
