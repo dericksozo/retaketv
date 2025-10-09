@@ -12,13 +12,15 @@ export const quoterLowLevelError = table("quoter_low_level_error", {
 })
 
 export const transferV400 = table("transfer_v4_0_0", {
-  from: db.address('from'),
-  to: db.address('to'),
+  fromAddress: db.address('from_address'),
+  toAddress: db.address('to_address'),
   token: db.address('token'),
   value: db.uint256('value'),
   ethValueInWei: db.uint256('eth_value_in_wei'),
+  usdcValue: db.uint256('usdc_value'),
   txHash: db.bytes32('tx_hash'),
   tokenContext: t.text('token_context'),
   blockNumber: db.uint256('block_number'),
+  blockTimestamp: db.uint256('block_timestamp'),
   sell: t.boolean('sell'),
 })

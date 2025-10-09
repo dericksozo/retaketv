@@ -5,6 +5,8 @@ import "sim-idx-generated/Generated.sol";
 import "./interfaces/IClankerTokenV4_0.sol";
 import "./interfaces/IClankerV4_0.sol";
 import "./interfaces/IV4Quoter.sol";
+import "./interfaces/IUniswapV3Pool.sol";
+import "./lib/MulDiv.sol";
 
 /// Index Transfer events from the ClankerTokenV4_0 contract
 /// This listener captures all token transfer events for tracking and analysis
@@ -17,9 +19,14 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
     address constant UNISWAP_V4_POOLMANAGER_BASE =
         0x498581fF718922c3f8e6A244956aF099B2652b2b;
     address constant WETH_BASE = 0x4200000000000000000000000000000000000006;
+    address constant USDC_BASE = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913;
     address constant UNISWAP_V4_QUOTER_BASE =
         0x0d5e0F971ED27FBfF6c2837bf31316121532048D;
     uint256 constant MINIMUM_ETH_VALUE = 0.001 ether;
+
+    // Uniswap V3 addresses (BASE)
+    // Uniswap v3 WETH/USDC 0.30% pool (Base):
+    address constant UNISWAP_V3_POOL_WETH_USDC_BASE = 0x6c561B446416E1A00E8E93E221854d6eA4171372;
 
     // from https://github.com/Uniswap/v4-core/blob/59d3ecf53afa9264a16bba0e38f4c5d2231f80bc/src/libraries/LPFeeLibrary.sol#L15
     uint24 public constant DYNAMIC_FEE_FLAG = 0x800000;
@@ -30,6 +37,7 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
         address token;
         uint256 value;
         uint256 ethValueInWei;
+        uint256 usdcValue;
         bytes32 txHash;
         string tokenContext;
         uint256 blockNumber;
@@ -81,13 +89,15 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
             .context();
 
         // get value in eth
-        uint256 ethValueInWei = getValue(
+        uint256 ethValueInWei = getValueInEth(
             ctx.txn.call.callee(),
             ctx.txn.hash(),
             inputs.value
         );
 
+
         require(ethValueInWei >= MINIMUM_ETH_VALUE, AmountTooLow(ethValueInWei, MINIMUM_ETH_VALUE));
+        uint256 usdcValue = getValueInUsdc(ethValueInWei);
 
         TransferData memory data = TransferData({
             fromAddress: inputs.from,
@@ -95,6 +105,7 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
             token: ctx.txn.call.callee(),
             value: inputs.value,
             ethValueInWei: ethValueInWei,
+            usdcValue: usdcValue,
             txHash: ctx.txn.hash(),
             tokenContext: tokenContext,
             blockNumber: block.number,
@@ -105,7 +116,36 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
         emit TransferV4_0_0(data);
     }
 
-    function getValue(
+    function getValueInUsdc(uint256 amountWei) internal returns (uint256 amountUsdc) {
+        IUniswapV3Pool pool = IUniswapV3Pool(UNISWAP_V3_POOL_WETH_USDC_BASE);
+        
+        (uint160 sqrtPriceX96,, , , , ,) = pool.slot0();
+        uint256 priceX192 = uint256(sqrtPriceX96) * uint256(sqrtPriceX96); // Q192
+
+        address t0 = pool.token0();
+        address t1 = pool.token1();
+
+        // Sanity: pool must be exactly WETH/USDC in either order
+        require(
+            (t0 == WETH_BASE && t1 == USDC_BASE) || (t0 == USDC_BASE && t1 == WETH_BASE),
+            "Unexpected pool tokens"
+        );
+
+        // Compute USDC (6 decimals) output for the given ETH wei input.
+        // NOTE: Uniswap v3 price math already uses raw token units, so no extra
+        // decimal scaling is needed beyond the Q192 divide/inverse.
+        if (t0 == WETH_BASE) {
+            // price is USDC per WETH in Q192
+            amountUsdc = MulDiv.mulDiv(amountWei, priceX192, 1 << 192);
+        } else {
+            // price is WETH per USDC in Q192 => invert
+            // amountUSDC = amountWei / (WETH per USDC)
+            //           = amountWei * 2^192 / priceX192
+            amountUsdc = MulDiv.mulDiv(amountWei, 1 << 192, priceX192);
+        }
+    }
+
+    function getValueInEth(
         address token,
         bytes32 txHash,
         uint256 amount
