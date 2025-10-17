@@ -11,10 +11,12 @@ export const quoterLowLevelError = table("quoter_low_level_error", {
   data: db.bytes('data'),
 })
 
-export const transferV400 = table("transfer_v4_0_0", {
+export const transfer = table("transfer", {
   fromAddress: db.address('from_address'),
   toAddress: db.address('to_address'),
   token: db.address('token'),
+  factory: db.address('factory'),
+  factoryVersion: db.uint8('factory_version'),
   value: db.uint256('value'),
   ethValueInWei: db.uint256('eth_value_in_wei'),
   usdcValue: db.uint256('usdc_value'),

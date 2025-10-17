@@ -32,8 +32,9 @@ contract Triggers is BaseTriggers {
         // ClankerTokenV4_0 Transfer events on BASE
         ClankerTokenV4_0Listener clankerTokenV4Listener = new ClankerTokenV4_0Listener();
         addTrigger(
-            chainAbi(Chains.Base.withStartBlock(CLANKER_V4_0_0_START_BLOCK), ClankerTokenV4_0$Abi()),
+            chainAbi(Chains.Base, ClankerTokenV4_0$Abi()),
             clankerTokenV4Listener.triggerOnTransferEvent()
         );
+
     }
 }

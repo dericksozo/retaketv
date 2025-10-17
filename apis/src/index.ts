@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { transferV400 } from "./db/schema/Listener"; // Adjust the import path as necessary
+import { transfer } from "./db/schema/Listener"; // Adjust the import path as necessary
 import { types, db, App, middlewares } from "@duneanalytics/sim-idx"; // Import schema to ensure it's registered
 
 const filterToken0 = types.Address.from(
@@ -14,7 +14,7 @@ app.get("/*", async (c) => {
     const result = await db
       .client(c)
       .select()
-      .from(transferV400)
+      .from(transfer)
       .limit(5);
 
     return Response.json({

@@ -16,6 +16,8 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
 
     address constant CLANKER_V4_0_0_BASE =
         0xE85A59c628F7d27878ACeB4bf3b35733630083a9;
+    address constant CLANKER_V3_1_FACTORY_BASE =
+        0x2A787b2362021cC3eEa3C24C4748a6cD5B687382;
     address constant UNISWAP_V4_POOLMANAGER_BASE =
         0x498581fF718922c3f8e6A244956aF099B2652b2b;
     address constant WETH_BASE = 0x4200000000000000000000000000000000000006;
@@ -35,6 +37,8 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
         address fromAddress;
         address toAddress;
         address token;
+        address factory; // detected factory that deployed the token
+        uint8 factoryVersion; // 3 or 4
         uint256 value;
         uint256 ethValueInWei;
         uint256 usdcValue;
@@ -54,7 +58,7 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
         address hooks;
     }
 
-    event TransferV4_0_0(TransferData);
+    event Transfer(TransferData);
 
 
 
@@ -87,23 +91,26 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
         // get token context for dev purposes. Via modifier we're already filtering any that don't contain "streamm deployment".
         string memory tokenContext = IClankerTokenV4_0(ctx.txn.call.callee())
             .context();
+        
+        // detect factory + version (v4 preferred via tokenDeploymentInfo, fallback to v3.1)
+        (address factory, uint8 factoryVersion, address v4Hook) = detectFactoryAndHook(ctx.txn.call.callee());
 
-        // get value in eth
-        uint256 ethValueInWei = getValueInEth(
-            ctx.txn.call.callee(),
-            ctx.txn.hash(),
-            inputs.value
-        );
-
-
-        require(ethValueInWei >= MINIMUM_ETH_VALUE, AmountTooLow(ethValueInWei, MINIMUM_ETH_VALUE));
-        uint256 usdcValue = getValueInUsdc(ethValueInWei);
+        // compute value only for v4 (v3.1 launches on Uniswap v3; this listener quotes v4 via hook)
+        uint256 ethValueInWei = 0;
+        uint256 usdcValue = 0;
+        if (factoryVersion == 4) {
+            ethValueInWei = getValueInEth(ctx.txn.call.callee(), v4Hook, inputs.value);
+            require(ethValueInWei >= MINIMUM_ETH_VALUE, AmountTooLow(ethValueInWei, MINIMUM_ETH_VALUE));
+            usdcValue = getValueInUsdc(ethValueInWei);
+        }
 
         TransferData memory data = TransferData({
             fromAddress: inputs.from,
             toAddress: inputs.to,
             token: ctx.txn.call.callee(),
             value: inputs.value,
+            factory: factory,
+            factoryVersion: factoryVersion,
             ethValueInWei: ethValueInWei,
             usdcValue: usdcValue,
             txHash: ctx.txn.hash(),
@@ -113,7 +120,7 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
             sell: ctx.txn.call.caller() == inputs.from
         });
 
-        emit TransferV4_0_0(data);
+        emit Transfer(data);
     }
 
     function getValueInUsdc(uint256 amountWei) internal returns (uint256 amountUsdc) {
@@ -147,27 +154,17 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
 
     function getValueInEth(
         address token,
-        bytes32 txHash,
+        address hook,
         uint256 amount
     ) internal returns (uint256) {
-        IClanker clanker = IClanker(CLANKER_V4_0_0_BASE);
-
-        IClanker.DeploymentInfo memory deploymentInfo = clanker
-            .tokenDeploymentInfo(token);
-
-
-        (address c0, address c1, bool aIsFirst) = addressSort(token, WETH_BASE);
-
-        // generate poolId
+        // generate poolKey directly from known token/WETH and detected hook (v4)
         IV4Quoter.PoolKey memory poolKey = IV4Quoter.PoolKey({
             currency0: token < WETH_BASE ? token : WETH_BASE,
             currency1: token < WETH_BASE ? WETH_BASE : token,
             fee: DYNAMIC_FEE_FLAG,
             tickSpacing: 200,
-            hooks: deploymentInfo.hook
+            hooks: hook
         });
-        // Generate the poolId as the keccak256 hash of the encoded poolKey
-        bytes32 poolId = keccak256(abi.encode(poolKey));
 
         // Check for overflow when converting uint256 to uint128
         require(amount <= type(uint128).max, "Amount too large for uint128");
@@ -180,20 +177,35 @@ contract ClankerTokenV4_0Listener is ClankerTokenV4_0$OnTransferEvent {
                 hookData: '0x00'
             });
 
-
         IV4Quoter quoter = IV4Quoter(UNISWAP_V4_QUOTER_BASE);
         
-        try quoter.quoteExactInputSingle(quoteExactSingleParams) returns (uint256 amountOut, uint256 gasEstimate) {
+        try quoter.quoteExactInputSingle(quoteExactSingleParams) returns (uint256 amountOut, uint256 /* gasEstimate */) {
             return amountOut;
         } catch Error(string memory reason) {
-            // Handle string errors (e.g., "Pool not found", "Insufficient liquidity")
             emit QuoterError(reason);
             return 0;
         } catch (bytes memory lowLevelData) {
-            // Handle low-level errors (e.g., function not found, revert without reason)
             emit QuoterLowLevelError(lowLevelData);
             return 0;
         }
+    }
+
+    function detectFactoryAndHook(address token)
+        internal
+        view
+        returns (address factory, uint8 factoryVersion, address hook)
+    {
+        // Try v4 factory registry first; if it returns without revert, classify as v4
+        IClanker clanker = IClanker(CLANKER_V4_0_0_BASE);
+        try clanker.tokenDeploymentInfo(token) returns (IClanker.DeploymentInfo memory info) {
+            // A valid v4 deployment will have a non-zero hook
+            if (info.hook != address(0)) {
+                return (CLANKER_V4_0_0_BASE, 4, info.hook);
+            }
+        } catch {
+            // fall through to v3.1
+        }
+        return (CLANKER_V3_1_FACTORY_BASE, 3, address(0));
     }
 
     function addressSort(
